@@ -29,7 +29,12 @@ from sklearn.metrics import roc_curve, auc
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
 
+#def krmsle(actual, predicted):
+#	m = Sequential()
+#	m.compile(loss='mean_squared_logarithmic_error', optimizer=adam)
+#	return m.mean_squared_logarithmic_error(actual, predicted)
 
 def se(actual, predicted):
     """
@@ -127,7 +132,7 @@ def rmsle(actual, predicted):
 def step_decay(epoch):
         initial_lrate = 0.001
         drop = 0.5
-        epochs_drop = 120.0
+        epochs_drop = 100.0
         lrate = initial_lrate * math.pow(drop,((1+epoch)/epochs_drop))
         return lrate
 
@@ -138,8 +143,12 @@ numpy.random.seed(seed)
 
 # load dataset
 data = numpy.load('../data/PreProcessData.npy')
-X = data[:,0:(data.shape[1]-1)]
-Y = data[:,(data.shape[1]-1)]
+X = data[0:1000,1:(data.shape[1]-1)]
+Y = data[0:1000,(data.shape[1]-1)]
+
+#PCA
+#pca = PCA(n_components=100)
+#X = pca.fit_transform(x)
 
 # Data Split
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=seed)
@@ -168,36 +177,36 @@ prelu7=keras.layers.advanced_activations.PReLU()
 HiddenNeurons = 128
 
 
-model.add(Dense(HiddenNeurons, input_dim=X_train.shape[1], init='uniform'))#,name='h1', activation='relu'))
-model.add(prelu)
+model.add(Dense(HiddenNeurons, input_dim=X_train.shape[1], init='uniform',name='h1', activation='relu'))
+#model.add(prelu)
 #model.add(Dropout(0.15))
 
-model.add(Dense(HiddenNeurons, init='uniform', name='h2'))#, activation='relu'))
-model.add(prelu1)
+model.add(Dense(HiddenNeurons, init='uniform', name='h2', activation='relu'))
+#model.add(prelu1)
 #model.add(Dropout(0.25))
 
-model.add(Dense(HiddenNeurons, init='uniform',name='h3'))#, activation='relu'))
-model.add(prelu2)
+model.add(Dense(HiddenNeurons, init='uniform',name='h3', activation='relu'))
+#model.add(prelu2)
 #model.add(Dropout(0.5))
 
-model.add(Dense(HiddenNeurons, init='uniform',name='h4'))#, activation='relu'))
-model.add(prelu3)
+model.add(Dense(HiddenNeurons, init='uniform',name='h4', activation='relu'))
+#model.add(prelu3)
 #model.add(Dropout(0.5))
 
-model.add(Dense(HiddenNeurons, init='uniform',name='h5'))#, activation='relu'))
-model.add(prelu4)
+model.add(Dense(HiddenNeurons, init='uniform',name='h5', activation='relu'))
+#model.add(prelu4)
 #model.add(Dropout(0.5))
 
-model.add(Dense(HiddenNeurons, init='uniform',name='h6'))#, activation='relu'))
-model.add(prelu5)
+model.add(Dense(HiddenNeurons, init='uniform',name='h6', activation='relu'))
+#model.add(prelu5)
 #model.add(Dropout(0.45))
 
-model.add(Dense(HiddenNeurons, init='uniform',name='h7'))#, activation='relu'))
-model.add(prelu6)
+model.add(Dense(HiddenNeurons, init='uniform',name='h7', activation='relu'))
+#model.add(prelu6)
 #model.add(Dropout(0.45))
 
-model.add(Dense(HiddenNeurons, init='uniform',name='h8'))#, activation='relu'))
-model.add(prelu7)
+model.add(Dense(HiddenNeurons, init='uniform',name='h8', activation='relu'))
+#model.add(prelu7)
 #model.add(Dropout(0.45))
 
 model.add(Dense(1, init='uniform',name='out'))
@@ -208,7 +217,7 @@ current_dir = os.path.dirname(os.path.realpath(__file__))
 model_path = os.path.join(current_dir, "FullyConnectedNetworkPrelu.png")
 plot(model, to_file=model_path, show_shapes=True)
 adam=keras.optimizers.Adam(lr=0.0005, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
-model.compile(loss='mae', optimizer=adam,metrics=['mae'])
+model.compile(loss='mean_squared_logarithmic_error', optimizer=adam,metrics=['msle'])
 
 # learning schedule callback
 history=History()
@@ -217,13 +226,13 @@ callbacks_list = [lrate,history]
 
 #model Fitting
 print "Training..."
-model.fit(X_train, y_train,validation_data=(X_test,y_test),nb_epoch=500, batch_size=1024, callbacks=callbacks_list, verbose=1)
+model.fit(X_train, y_train,validation_data=(X_test,y_test),nb_epoch=500, batch_size=100, callbacks=callbacks_list, verbose=1)
 #model.fit(X_train, y_train,validation_data=(X_test,y_test),nb_epoch=550, batch_size=X_train.shape[0],class_weight={0:1, 1:6756.0/271}, callbacks=callbacks_list, verbose=1)
 
 #Model prediction
-pred=model.predict(X_test,batch_size=25)
-err = mse(y_test, pred)
-print err
+#pred=model.predict(X_test,batch_size=25)
+#err = model.metrics.mean_squared_logarithmic_error(y_test, pred)
+#print err
 
 #numpy.save("Prediction.npy",predicted)
 #numpy.save("Xtest.npy",X_test)
