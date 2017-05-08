@@ -146,6 +146,9 @@ data = numpy.load('../data/PreProcessData.npy')
 X = data[:,1:(data.shape[1]-1)]
 Y = data[:,(data.shape[1]-1)]
 
+val_data = numpy.load('../data/PreProcessDataTest.npy')
+val = val_data[:,1:]
+
 #PCA
 #pca = PCA(n_components=100)
 #X = pca.fit_transform(x)
@@ -226,15 +229,15 @@ callbacks_list = [lrate,history]
 
 #model Fitting
 print "Training..."
-model.fit(X_train, y_train,validation_data=(X_test,y_test),nb_epoch=500, batch_size=100, callbacks=callbacks_list, verbose=1)
+model.fit(X_train, y_train,validation_data=(X_test,y_test),nb_epoch=5, batch_size=100, callbacks=callbacks_list, verbose=1)
 #model.fit(X_train, y_train,validation_data=(X_test,y_test),nb_epoch=550, batch_size=X_train.shape[0],class_weight={0:1, 1:6756.0/271}, callbacks=callbacks_list, verbose=1)
 
 #Model prediction
-#pred=model.predict(X_test,batch_size=25)
+pred=model.predict(val,batch_size=25)
 #err = model.metrics.mean_squared_logarithmic_error(y_test, pred)
 #print err
 
-#numpy.save("Prediction.npy",predicted)
+numpy.save("Prediction.npy",pred)
 #numpy.save("Xtest.npy",X_test)
 #model.save('H8_student.h5')
 
